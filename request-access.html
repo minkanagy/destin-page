@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request Access — Destin</title>
+<meta name="description" content="Request beta access to Destin, the social city discovery app.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0806;
+    --surface:#120F0B;
+    --amber:#B8611E;
+    --amber-soft:rgba(184,97,30,0.14);
+    --amber-line:rgba(184,97,30,0.30);
+    --cream:#EDE6DA;
+    --muted:#8A7A68;
+    --divider:rgba(184,97,30,0.22);
+    --error:#C4553B;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--bg);
+    color:var(--cream);
+    font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    flex-direction:column;
+  }
+
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:400;
+    margin:0;
+  }
+
+  a{ color:inherit; text-decoration:none; }
+
+  .label{
+    font-family:'Inter', sans-serif;
+    font-size:11px;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    color:var(--muted);
+    font-weight:500;
+  }
+
+  nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:22px 32px;
+    border-bottom:1px solid var(--divider);
+  }
+  .logo{
+    font-family:'Fraunces', serif;
+    font-size:19px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+  }
+  .back-link{
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+    transition:color 0.2s ease;
+  }
+  .back-link:hover{ color:var(--amber); }
+
+  main{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:60px 24px;
+  }
+
+  .card{
+    width:100%;
+    max-width:460px;
+  }
+
+  .card .label{ margin-bottom:18px; display:block; }
+  .card h1{
+    font-size:clamp(30px, 4vw, 42px);
+    line-height:1.15;
+    margin-bottom:14px;
+  }
+  .card p.sub{
+    font-size:15px;
+    line-height:1.6;
+    color:var(--muted);
+    margin-bottom:40px;
+  }
+
+  form{ display:flex; flex-direction:column; gap:20px; }
+
+  .field label{
+    display:block;
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:10px;
+  }
+  .field input{
+    width:100%;
+    background:transparent;
+    border:1px solid var(--amber-line);
+    outline:none;
+    padding:16px 18px;
+    color:var(--cream);
+    font-family:'Inter', sans-serif;
+    font-size:15px;
+    transition:border-color 0.2s ease;
+  }
+  .field input::placeholder{ color:var(--muted); }
+  .field input:focus{ border-color:var(--amber); }
+  .field.has-error input{ border-color:var(--error); }
+
+  button[type="submit"]{
+    margin-top:12px;
+    background:var(--amber);
+    color:#0A0806;
+    border:none;
+    padding:18px 24px;
+    font-size:12px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    font-weight:600;
+    cursor:pointer;
+    transition:background 0.25s ease, opacity 0.25s ease;
+  }
+  button[type="submit"]:hover{ background:#D4772A; }
+  button[type="submit"]:disabled{ opacity:0.6; cursor:default; }
+
+  .status-note{
+    margin-top:18px;
+    font-size:13px;
+    line-height:1.5;
+    min-height:18px;
+    color:var(--muted);
+  }
+  .status-note.success{ color:var(--amber); }
+  .status-note.error{ color:var(--error); }
+
+  .success-state{ display:none; }
+  .success-state.visible{ display:block; }
+  .success-state h1{ margin-bottom:14px; }
+  .success-state p{
+    font-size:15px;
+    line-height:1.6;
+    color:var(--muted);
+  }
+  form.hidden{ display:none; }
+
+  footer{
+    padding:28px 32px;
+    border-top:1px solid var(--divider);
+    font-size:12px;
+    color:var(--muted);
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">Destin</span>
+  <a class="back-link" href="index.html">← Back</a>
+</nav>
+
+<main>
+  <div class="card">
+    <div id="form-state">
+      <span class="label">Request access</span>
+      <h1>Get on the list.</h1>
+      <p class="sub">Tell us who you are and we'll reach out as beta spots open up.</p>
+      <form id="access-form">
+        <div class="field" id="name-field">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" placeholder="Your name" required autocomplete="name">
+        </div>
+        <div class="field" id="email-field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="your@email.com" required autocomplete="email">
+        </div>
+        <button type="submit">Request Beta Access</button>
+        <p class="status-note" id="status-note"></p>
+      </form>
+    </div>
+
+    <div class="success-state" id="success-state">
+      <span class="label">You're in the queue</span>
+      <h1 id="success-heading">Thanks — you're on the list.</h1>
+      <p>We'll email you as soon as a beta spot opens up. In the meantime, <a href="index.html" style="color:var(--amber); border-bottom:1px solid var(--amber-line);">head back home</a>.</p>
+    </div>
+  </div>
+</main>
+
+<footer>© 2026 Paladin Technologies</footer>
+
+<script>
+  const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mrewwkgp';
+
+  const form = document.getElementById('access-form');
+  const formState = document.getElementById('form-state');
+  const successState = document.getElementById('success-state');
+  const statusNote = document.getElementById('status-note');
+  const nameField = document.getElementById('name-field');
+  const emailField = document.getElementById('email-field');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const btn = form.querySelector('button[type="submit"]');
+    const originalBtnText = btn.textContent;
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+
+    nameField.classList.remove('has-error');
+    emailField.classList.remove('has-error');
+    statusNote.className = 'status-note';
+    statusNote.textContent = '';
+
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    let ok = false;
+    try {
+      const res = await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email })
+      });
+      ok = res.ok;
+    } catch (err) {
+      ok = false;
+    }
+
+    if (!ok) {
+      btn.disabled = false;
+      btn.textContent = originalBtnText;
+      statusNote.className = 'status-note error';
+      statusNote.textContent = 'Something went wrong — try again in a moment.';
+      return;
+    }
+
+    formState.style.display = 'none';
+    const firstName = name.split(' ')[0];
+    document.getElementById('success-heading').textContent = `You're on the list, ${firstName}.`;
+    successState.classList.add('visible');
+  });
+</script>
+
+</body>
+</html>
