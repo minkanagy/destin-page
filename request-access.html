@@ -129,20 +129,20 @@
   .field input:focus{ border-color:var(--amber); }
   .field.has-error input{ border-color:var(--error); }
 
-  button[type="submit"]{
+button[type="submit"]{
     margin-top:12px;
-    background:var(--amber);
-    color:#0A0806;
-    border:none;
+    background:transparent;
+    color:var(--cream);
+    border:1px solid var(--amber-line);
     padding:18px 24px;
     font-size:12px;
     letter-spacing:0.18em;
     text-transform:uppercase;
     font-weight:600;
     cursor:pointer;
-    transition:background 0.25s ease, opacity 0.25s ease;
+    transition:background 0.25s ease, border-color 0.25s ease, opacity 0.25s ease;
   }
-  button[type="submit"]:hover{ background:#D4772A; }
+  button[type="submit"]:hover{ background:var(--amber-soft); border-color:var(--amber); }
   button[type="submit"]:disabled{ opacity:0.6; cursor:default; }
 
   .status-note{
@@ -177,8 +177,7 @@
 <body>
 
 <nav>
-  <span class="logo">Destin</span>
-  <a class="back-link" href="index.html">← Back</a>
+  <a class="logo" href="index.html">Destin</a>
 </nav>
 
 <main>

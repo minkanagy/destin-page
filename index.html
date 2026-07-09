@@ -217,7 +217,15 @@
   }
 
   @media (max-width: 700px){
-    .scribble-note{ display:none; }
+    .scribble-note{
+    position:absolute;
+    top:100%;
+    left:-30px;
+    margin-top:22px;
+    width:230px;
+    pointer-events:none;
+    transition:opacity 0.4s ease;
+}
   }
 
   /* ---------- SECTION SHARED ---------- */
@@ -489,7 +497,6 @@
     <span class="label">Get in</span>
     <h2 style="margin-top:18px;">Beta's open. Go find out what's good.</h2>
     <div class="closing-links">
-      <a href="#" id="testflight-link-2">TestFlight</a>
       <a href="mailto:info@paladintechnologies.org">Contact</a>
     </div>
   </div>
