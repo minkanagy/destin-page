@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/venue/:id", "destination": "/api/venue?id=:id" },
+    { "source": "/event/:id", "destination": "/api/event?id=:id" },
+    { "source": "/u/:username", "destination": "/api/profile?username=:username" }
+  ]
+}
