@@ -1,21 +1,16 @@
 // dstn.app  ·  venue link page
-// Lives at:  api/venue.tsx
-// After we add the routing file, a shared link looks like:  dstn.app/venue/SOME_ID
-//
-// This page is what iMessage, Slack, X, etc. actually read. It hands them a
-// title, a description, and the picture (from api/og/venue). Humans who tap it
-// see the card and a button into the app.
+// Lives at:  api/venue.tsx   ->   shared as  dstn.app/venue/SOME_ID
 
 export const config = { runtime: 'edge' };
 
-type Venue = { name: string; tagline: string | null };
+type Venue = { name: string; address: string | null };
 
 async function getVenue(id: string | null): Promise<Venue | null> {
   if (!id) return null;
   try {
     const url =
       `${process.env.SUPABASE_URL}/rest/v1/locations` +
-      `?id=eq.${encodeURIComponent(id)}&select=name,tagline&limit=1`;
+      `?id=eq.${encodeURIComponent(id)}&select=name,address&limit=1`;
     const res = await fetch(url, {
       headers: {
         apikey: process.env.SUPABASE_ANON_KEY as string,
@@ -30,13 +25,15 @@ async function getVenue(id: string | null): Promise<Venue | null> {
   }
 }
 
-// small helper so a venue name with quotes or < > cannot break the page
+function shortAddress(address: string | null): string {
+  if (!address) return 'A place worth finding, on Destin.';
+  const parts = address.split(',').map((s) => s.trim()).filter(Boolean);
+  const city = parts.length >= 3 ? parts[parts.length - 3] : parts[1] ?? parts[0];
+  return [parts[0], city].filter(Boolean).join(', ');
+}
+
 function esc(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 export default async function handler(req: Request) {
@@ -44,15 +41,15 @@ export default async function handler(req: Request) {
   const id = searchParams.get('id');
 
   const venue = (await getVenue(id)) ?? {
-    name: 'Bar Shiru',
-    tagline: 'A jazz kissa in Uptown, analog sound and soul on vinyl',
+    name: 'Ferry Building',
+    address: '1 Ferry Building, San Francisco, CA 94105, USA',
   };
 
   const title = esc(venue.name);
-  const desc = esc(venue.tagline ?? 'A place worth finding, on Destin.');
+  const desc = esc(shortAddress(venue.address));
   const imageUrl = `${origin}/api/og/venue${id ? `?id=${encodeURIComponent(id)}` : ''}`;
   const pageUrl = `${origin}/venue/${id ?? ''}`;
-  const appLink = `destin://venue/${id ?? ''}`; // opens the app if installed
+  const appLink = `destin://venue/${id ?? ''}`;
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -61,7 +58,6 @@ export default async function handler(req: Request) {
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${title} · Destin</title>
 
-<!-- these five lines are what makes the pretty preview appear -->
 <meta property="og:type" content="website" />
 <meta property="og:title" content="${title}" />
 <meta property="og:description" content="${desc}" />
@@ -88,7 +84,5 @@ export default async function handler(req: Request) {
 </body>
 </html>`;
 
-  return new Response(html, {
-    headers: { 'content-type': 'text/html; charset=utf-8' },
-  });
+  return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8' } });
 }
