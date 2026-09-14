@@ -48,7 +48,6 @@ async function getVenue(id: string | null): Promise<Venue | null> {
   }
 }
 
-// pull a city + a short "street, city" line out of the full address
 function parseWhere(address: string | null): { city: string; line: string } {
   if (!address) return { city: 'San Francisco', line: '' };
   const parts = address.split(',').map((s) => s.trim()).filter(Boolean);
@@ -103,6 +102,17 @@ export default async function handler(req: Request) {
 
       </div>
     ),
-    { width: 1200, height: 630, fonts },
+    {
+      width: 1200,
+      height: 630,
+      fonts,
+      // Replaces Vercel's default "cache forever, never re-check" header.
+      // CDN keeps a copy for a day, serves it while quietly refreshing for a
+      // week, so a card updates within a day of the venue data changing
+      // instead of being frozen on whatever it first rendered.
+      headers: {
+        'cache-control': 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800',
+      },
+    },
   );
 }
