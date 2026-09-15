@@ -42,8 +42,17 @@ async function loadFonts() {
   try {
     const caveat = await grab('https://cdn.jsdelivr.net/npm/@fontsource/caveat@5/files/caveat-latin-400-normal.woff');
     fonts.push({ name: 'Script', data: caveat, weight: 400 as const, style: 'normal' as const });
-  } catch {
+    } catch {
     // caption falls back to Fraunces if the script font can't be fetched
+  }
+
+  // Subtitle italic — Fraunces italic for the description line. try/catch so a
+  // fetch hiccup can't blank the whole card.
+  try {
+    const frauncesItalic = await grab('https://cdn.jsdelivr.net/npm/@fontsource/fraunces@5/files/fraunces-latin-300-italic.woff');
+    fonts.push({ name: 'Fraunces', data: frauncesItalic, weight: 300 as const, style: 'italic' as const });
+  } catch {
+    // description falls back to upright Fraunces if the italic can't be fetched
   }
 
   return fonts;
@@ -88,6 +97,16 @@ return {
   } catch {
     return null;
   }
+}
+
+// cover_image_url can be a full URL OR a bare Supabase storage path. Turn a
+// path into a public URL so Satori can fetch it; leave full URLs untouched.
+const STORAGE_BUCKET = 'event-covers';
+
+function toPublicUrl(value: string | null): string | null {
+  if (!value) return null;
+  if (/^https?:\/\//i.test(value)) return value; // already a full URL
+  return `${process.env.SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${value}`;
 }
 
 // Satori fetches and decodes the photo itself; if it can't (a non-public
@@ -158,8 +177,10 @@ const event: EventRow = (await getEvent(id)) ?? {
     ? (description.length > 120 ? description.slice(0, 119).trimEnd() + '…' : description)
     : null;
 
-  const photoSrc =
-    imgOverride && /^https?:\/\//i.test(imgOverride) ? imgOverride : event.cover_image_url;
+    const photoSrc =
+    imgOverride && /^https?:\/\//i.test(imgOverride)
+      ? imgOverride
+      : toPublicUrl(event.cover_image_url);
   const [fonts, photo] = await Promise.all([loadFonts(), usablePhoto(photoSrc)]);
   const initial = (event.name.match(/[A-Za-z0-9]/)?.[0] ?? 'D').toUpperCase();
   // No em dash in the signature, per house style; en dash in handwriting reads fine.
@@ -184,7 +205,7 @@ const event: EventRow = (await getEvent(id)) ?? {
             <div style={{ display: 'flex', fontFamily: 'Fraunces', fontSize: 70, lineHeight: 1.03, color: C.cream }}>{event.name}</div>
 
             {blurb ? (
-              <div style={{ display: 'flex', fontSize: 29, fontWeight: 300, color: C.cream, marginTop: 30 }}>{blurb}</div>
+              <div style={{ display: 'flex', fontFamily: 'Fraunces', fontStyle: 'italic', fontWeight: 300, fontSize: 27, lineHeight: 1.35, color: C.secondary, marginTop: 24 }}>{blurb}</div>
             ) : null}
 
             {when ? (
