@@ -68,8 +68,30 @@ async function getVenue(id: string | null): Promise<Venue | null> {
 
 // Later: replace with a fetch to your public venue-photo source and return the
 // first image URL (or null). For now it just honours a manual &img= override.
-async function getVenuePhoto(_id: string | null, override: string | null): Promise<string | null> {
-  return override && /^https?:\/\//i.test(override) ? override : null;
+async function getVenuePhoto(id: string | null, override: string | null): Promise<string | null> {
+  // manual override still wins — keeps &img= working for testing
+  if (override && /^https?:\/\//i.test(override)) return override;
+  if (!id) return null;
+  try {
+    const res = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/rpc/get_public_location_photo`,
+      {
+        method: 'POST',
+        headers: {
+          apikey: process.env.SUPABASE_ANON_KEY as string,
+          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY as string}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ p_location_id: id }),
+      },
+    );
+    if (!res.ok) return null;
+    const path = (await res.json()) as string | null; // scalar text or null
+    if (!path) return null;
+    return `${process.env.SUPABASE_URL}/storage/v1/object/public/review-images/${path}`;
+  } catch {
+    return null;
+  }
 }
 
 function parseWhere(address: string | null): { city: string; line: string } {
