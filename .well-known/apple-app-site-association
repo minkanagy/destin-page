@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["TEAMID.app.dstn"],
+        "components": [
+          { "/": "/venue/*", "comment": "Open venue links in the app" }
+        ]
+      }
+    ]
+  }
+}

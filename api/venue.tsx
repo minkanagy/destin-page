@@ -49,10 +49,10 @@ export default async function handler(req: Request) {
   const desc = esc(shortAddress(venue.address));
   const imageUrl = `${origin}/api/og/venue${id ? `?id=${encodeURIComponent(id)}` : ''}`;
   const pageUrl = `${origin}/venue/${id ?? ''}`;
-  const appLink = `destin://venue/${id ?? ''}`;
+  const appLink = `destin://location/${id ?? ''}`;
 
   const html = `<!DOCTYPE html>
-<html lang="en">
+<html lang="en">$
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
