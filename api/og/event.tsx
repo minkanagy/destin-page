@@ -90,6 +90,23 @@ async function getEvent(id: string | null): Promise<EventRow | null> {
   }
 }
 
+// Satori fetches and decodes the photo itself; if it can't (a non-public
+// bucket returns 403, or the format is one it can't decode, like WebP or
+// AVIF) it throws and blanks the WHOLE card. So validate first: only pass a
+// photo through when it fetches cleanly as PNG or JPEG, otherwise fall back
+// to the initial letter and the card still renders.
+async function usablePhoto(url: string | null): Promise<string | null> {
+  if (!url || !/^https?:\/\//i.test(url)) return null;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const type = res.headers.get('content-type') ?? '';
+    return /^image\/(png|jpe?g)/i.test(type) ? url : null;
+  } catch {
+    return null;
+  }
+}
+
 // Same city parsing as the venue card, run on the joined address.
 function parseWhere(address: string | null): { city: string; line: string } {
   if (!address) return { city: 'San Francisco', line: '' };
@@ -133,11 +150,11 @@ export default async function handler(req: Request) {
     address: '3158 Mission St, San Francisco, CA 94110, USA',
   };
 
-  const fonts = await loadFonts();
   const where = parseWhere(event.address);
   const when = formatWhen(event.starts_at, event.ends_at);
-  const photo =
+  const photoSrc =
     imgOverride && /^https?:\/\//i.test(imgOverride) ? imgOverride : event.cover_image_url;
+  const [fonts, photo] = await Promise.all([loadFonts(), usablePhoto(photoSrc)]);
   const initial = (event.name.match(/[A-Za-z0-9]/)?.[0] ?? 'D').toUpperCase();
   // No em dash in the signature, per house style; en dash in handwriting reads fine.
   const caption = from ? `Look what I found on Destin!  – ${from}` : 'Look what I found on Destin!';
