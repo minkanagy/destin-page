@@ -51,7 +51,7 @@ async function loadFonts() {
 
 type EventRow = {
   name: string;
-  performer: string | null;
+  description: string | null;
   starts_at: string | null;
   ends_at: string | null;
   cover_image_url: string | null;
@@ -64,7 +64,7 @@ async function getEvent(id: string | null): Promise<EventRow | null> {
     const url =
       `${process.env.SUPABASE_URL}/rest/v1/events` +
       `?id=eq.${encodeURIComponent(id)}` +
-      `&select=name,performer,starts_at,ends_at,cover_image_url,locations(address)&limit=1`;
+      `&select=name,description,starts_at,ends_at,cover_image_url,locations(address)&limit=1`;
     const res = await fetch(url, {
       headers: {
         apikey: process.env.SUPABASE_ANON_KEY as string,
@@ -77,14 +77,14 @@ async function getEvent(id: string | null): Promise<EventRow | null> {
     if (!row) return null;
     // Embedded to-one usually returns an object, but handle the array shape too.
     const loc = Array.isArray(row.locations) ? row.locations[0] : row.locations;
-    return {
-      name: row.name,
-      performer: row.performer ?? null,
-      starts_at: row.starts_at ?? null,
-      ends_at: row.ends_at ?? null,
-      cover_image_url: row.cover_image_url ?? null,
-      address: loc?.address ?? null,
-    };
+return {
+  name: row.name,
+  description: row.description ?? null,
+  starts_at: row.starts_at ?? null,
+  ends_at: row.ends_at ?? null,
+  cover_image_url: row.cover_image_url ?? null,
+  address: loc?.address ?? null,
+};
   } catch {
     return null;
   }
@@ -141,17 +141,23 @@ export default async function handler(req: Request) {
   const from = searchParams.get('from');
   const imgOverride = searchParams.get('img');
 
-  const event: EventRow = (await getEvent(id)) ?? {
-    name: 'An Evening on Destin',
-    performer: null,
-    starts_at: null,
-    ends_at: null,
-    cover_image_url: null,
-    address: '3158 Mission St, San Francisco, CA 94110, USA',
-  };
+const event: EventRow = (await getEvent(id)) ?? {
+  name: 'An Evening on Destin',
+  description: null,
+  starts_at: null,
+  ends_at: null,
+  cover_image_url: null,
+  address: '3158 Mission St, San Francisco, CA 94110, USA',
+};
 
-  const where = parseWhere(event.address);
-  const when = formatWhen(event.starts_at, event.ends_at);
+    const where = parseWhere(event.address);
+    const when = formatWhen(event.starts_at, event.ends_at);
+
+    const description = event.description?.trim();
+  const blurb = description
+    ? (description.length > 120 ? description.slice(0, 119).trimEnd() + '…' : description)
+    : null;
+
   const photoSrc =
     imgOverride && /^https?:\/\//i.test(imgOverride) ? imgOverride : event.cover_image_url;
   const [fonts, photo] = await Promise.all([loadFonts(), usablePhoto(photoSrc)]);
@@ -177,8 +183,8 @@ export default async function handler(req: Request) {
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 48px', flex: 1 }}>
             <div style={{ display: 'flex', fontFamily: 'Fraunces', fontSize: 70, lineHeight: 1.03, color: C.cream }}>{event.name}</div>
 
-            {event.performer ? (
-              <div style={{ display: 'flex', fontSize: 29, fontWeight: 300, color: C.cream, marginTop: 30 }}>{event.performer}</div>
+            {blurb ? (
+              <div style={{ display: 'flex', fontSize: 29, fontWeight: 300, color: C.cream, marginTop: 30 }}>{blurb}</div>
             ) : null}
 
             {when ? (
